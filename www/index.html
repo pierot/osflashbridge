@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- 
+
+	NLFlashBridgeDispatcher("INIT");
+		
+	NLFlashBridgeFlashDispatcher("onInit");
+	
+	NLFlashBridgeListener("INIT", onInit);
+	
+-->
+<html>
+<head>
+	<title>Netlog - OpenSocial Flash Bridge</title>
+	
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	
+	<link rel="stylesheet" type="text/css" href="assets/css/nlbridge.css" media="all" />
+	
+	<script type="text/javascript" src="assets/js/jquery-1.3.min.js"></script>
+	<script type="text/javascript" src="assets/js/nlFlashBridge.js"></script>
+	<script type="text/javascript" src="assets/js/swfobject.js"></script>
+	
+	<script type="text/javascript">
+		
+		var flashvars = { };
+		var params = { allowFullScreen : true, allowScriptAccess: "always" };
+		var attributes = { id: "flash_flash" };
+		
+		swfobject.embedSWF("assets/swf/NetlogFlashBridge.swf", "flash_alternative", "710px", "400px", "9.0.0", "assets/swf/playerProductInstall.swf", flashvars, params, attributes);
+
+	</script>	
+	
+	<script type="text/javascript">
+	
+		function NLFlashBridgeInit()
+		{
+			trace("NLFlashBridgeInit");
+			
+		}
+		
+	</script>
+	
+</head>
+<body>
+
+	<div id="flash_alternative">
+		Alternative
+	</div>
+	
+	<script type="text/javascript">
+
+		$(document).ready(function()
+		{
+			NLFlashBridgeInit();
+		});
+
+	</script>
+
+</body>
+</html>

@@ -1,0 +1,5 @@
+<messagebundle>
+	<msg name="ACT_USING">
+		${Subject.DisplayName} is using the Netlog Flash Bridge for ${URL}!
+	</msg>
+</messagebundle> 

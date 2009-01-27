@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" initialize="init()" width="720" height="455" borderColor="#DBDEDF" backgroundGradientAlphas="[1.0, 1.0]" backgroundGradientColors="[#AFAFAF, #858585]" xmlns:local="*">
+	
+	<mx:Script>
+		<![CDATA[
+			import be.wellconsidered.apis.nlbridge.data.NLMessageTypes;
+			import mx.controls.Alert;
+			import mx.collections.ArrayCollection;
+
+			import be.wellconsidered.apis.nlbridge.data.NLUser;
+		
+			import be.wellconsidered.apis.nlbridge.events.NLBridgeEvents;
+			import be.wellconsidered.logging.Logger;
+		
+			import be.wellconsidered.apis.nlbridge.NLBridge;
+			
+			private var _nlBridge:NLBridge;
+			
+			private function init():void
+			{
+				Logger.isVerbose = true;
+				Logger.log("NLFlashBridge Application Init");
+				
+				Security.allowDomain("*");
+				Security.allowDomain("nl.api.netlog.com");
+				
+				_nlBridge = new NLBridge();
+				_nlBridge.addEventListener(NLBridgeEvents.INIT, onInit, false, 0, true);
+				
+				
+				var arrcTypes:ArrayCollection = new ArrayCollection();
+				
+				arrcTypes.addItem({label: NLMessageTypes.EMAIL, data: NLMessageTypes.EMAIL});
+				arrcTypes.addItem({label: NLMessageTypes.NOTIFICATION, data: NLMessageTypes.NOTIFICATION});
+				arrcTypes.addItem({label: NLMessageTypes.PRIVATE_MESSAGE, data: NLMessageTypes.PRIVATE_MESSAGE});
+				arrcTypes.addItem({label: NLMessageTypes.PUBLIC_MESSAGE, data: NLMessageTypes.PUBLIC_MESSAGE});
+				
+				cboTypes.dataProvider = arrcTypes;
+			}
+			
+			private function onInit():void
+			{
+				Logger.log("Init Netlog Flash Bridge");
+			}
+			
+			private function getCurrentUserInfo():void
+			{
+				_nlBridge.addEventListener(NLBridgeEvents.CURRENT_USER, onCurrentUser, false, 0, true);
+				_nlBridge.getCurrentUser();
+			}
+			
+			private function onCurrentUser(e:NLBridgeEvents):void
+			{
+				Logger.log("On Current User");
+				
+				_nlBridge.removeEventListener(NLBridgeEvents.CURRENT_USER, onCurrentUser);
+				
+				upCurrent.txtDisplayName.text = _nlBridge.nluser.displayName;
+				upCurrent.txtID.text = _nlBridge.nluser.id;
+				upCurrent.txtName.text = _nlBridge.nluser.givenName + " " + _nlBridge.nluser.familyName;
+				upCurrent.txtOwner.text = String(_nlBridge.nluser.isOwner);
+				upCurrent.txtViewer.text = String(_nlBridge.nluser.isViewer);
+				
+				upCurrent.imThumb.load(_nlBridge.nluser.thumbnailUrl);
+			}
+			
+			private function getUserProfile(userid:String):void
+			{
+				if(userid.length > 0)
+				{
+					_nlBridge.addEventListener(NLBridgeEvents.USER_PROFILE, onUserProfile, false, 0, true);
+					_nlBridge.getUserProfile(userid);
+				}
+			}
+			
+			private function onUserProfile(e:NLBridgeEvents):void
+			{
+				Logger.log("On User Profile");
+				
+				_nlBridge.removeEventListener(NLBridgeEvents.USER_PROFILE, onUserProfile);
+				
+				var nluRequested:NLUser = e.data as NLUser;
+				
+				upRequested.txtDisplayName.text = nluRequested.displayName;
+				upRequested.txtID.text = nluRequested.id;
+				upRequested.txtName.text = nluRequested.givenName + " " + nluRequested.familyName;
+				upRequested.txtOwner.text = String(nluRequested.isOwner);
+				upRequested.txtViewer.text = String(nluRequested.isViewer);
+				
+				upRequested.imThumb.load(nluRequested.thumbnailUrl); 
+			}
+			
+			private function getFriendsOfCurrentUser():void
+			{
+				if(_nlBridge.nluser)
+				{
+					_nlBridge.addEventListener(NLBridgeEvents.FRIENDS, onCurrentUserFriends, false, 0, true);
+					_nlBridge.getFriends(_nlBridge.nluser.id);
+				}
+			}
+			
+			private function onCurrentUserFriends(e:NLBridgeEvents):void
+			{
+				Logger.log("Current User Friends");
+				
+				_nlBridge.removeEventListener(NLBridgeEvents.FRIENDS, onCurrentUserFriends);
+				
+				var arrcFriends:ArrayCollection = new ArrayCollection();
+				var arrFriends:Array = e.data as Array;
+				
+				for(var i:int = 0; i < arrFriends.length; i++)
+				{
+					var nuFriend:NLUser = new NLUser(arrFriends[i]);
+					
+					arrcFriends.addItem({uid: nuFriend.id, name: nuFriend.displayName + "(" + nuFriend.givenName + " " + nuFriend.familyName + ")"});
+				}
+				
+				dgFriendsCurrent.dataProvider = arrcFriends;
+			}
+			
+			private function getFriendsOfUser(userid:String):void
+			{
+				var sUserId:String = "";
+				
+				if(userid.length > 0)
+				{
+					sUserId = userid;
+				}
+				else if(dgFriendsCurrent.selectedItems.length > 0)
+				{
+					sUserId = dgFriendsCurrent.selectedItems[0].uid;
+				}
+				
+				if(sUserId.length > 0)
+				{
+					_nlBridge.addEventListener(NLBridgeEvents.FRIENDS, onUserFriends, false, 0, true);
+					_nlBridge.getFriends(userid);
+				}
+			}
+			
+			private function onUserFriends(e:NLBridgeEvents):void
+			{
+				Logger.log("User Friends");
+				
+				_nlBridge.removeEventListener(NLBridgeEvents.FRIENDS, onUserFriends);
+				
+				var arrcFriends:ArrayCollection = new ArrayCollection();
+				var arrFriends:Array = e.data as Array;
+				
+				for(var i:int = 0; i < arrFriends.length; i++)
+				{
+					var nuFriend:NLUser = new NLUser(arrFriends[i]);
+					
+					arrcFriends.addItem({uid: nuFriend.id, name: nuFriend.displayName + "(" + nuFriend.givenName + " " + nuFriend.familyName + ")"});
+				}
+				
+				dgFriendsUser.dataProvider = arrcFriends;
+			}
+			
+			private function postActivity():void
+			{
+				_nlBridge.addEventListener(NLBridgeEvents.ACTIVITY_POSTED, onActPosted, false, 0, true);
+				_nlBridge.postActivity("ACT_USING");
+			}
+			
+			private function onActPosted(e:NLBridgeEvents):void
+			{
+				Logger.log("Activity Posted"); 
+				
+				Alert.show("Activity Posted");
+						
+				_nlBridge.removeEventListener(NLBridgeEvents.ACTIVITY_POSTED, onActPosted);
+			}
+			
+			private function sendMessage(bodyCopy:String):void
+			{
+				var arrRecipients:Array = new Array();
+				
+				if(dgFriendsCurrent.selectedItems.length > 0)
+				{
+					for(var i:int = 0; i < dgFriendsCurrent.selectedItems.length; i++)
+					{
+						arrRecipients.push(dgFriendsCurrent.selectedItems[i].uid);
+					}
+				}
+					
+				_nlBridge.addEventListener(NLBridgeEvents.MESSAGE_SENT, onMessageSent, false, 0, true);
+				_nlBridge.sendMessage("Doe mee met de Netlog Flash Bridge", bodyCopy, arrRecipients.length > 0 ? arrRecipients : "65969760", cboTypes.selectedItem.data);
+			}
+			
+			private function onMessageSent(e:NLBridgeEvents):void
+			{
+				Logger.log("Message Sent");
+				
+				Alert.show("Message Posted");
+						
+				_nlBridge.removeEventListener(NLBridgeEvents.MESSAGE_SENT, onMessageSent);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Text x="10" y="10" text="Netlog Flash Bridge" fontFamily="Arial" fontSize="18" fontWeight="bold" color="#3C0B0B"/>
+	<mx:Button x="10" y="44" label="Current User " click="getCurrentUserInfo()" />
+	<mx:Button x="116" y="44" label="Get Friends" width="94" click="getFriendsOfCurrentUser()"/>
+	<mx:Button x="221" y="44" label="Post Activity" click="postActivity()"/>
+	<mx:TextInput x="10" y="74" width="98" id="txtMessage" >
+		<mx:text><![CDATA[Develop ook voor Netlog. Met een <a href='http://www.proximity.bbdo.be?test=hallo'>webadres</a>!]]></mx:text>
+	</mx:TextInput>
+	<mx:ComboBox x="116" y="74" width="91" id="cboTypes"></mx:ComboBox>
+	<mx:Button x="215" y="74" label="Send Message" click="sendMessage(txtMessage.text)"/>
+	<local:UserProfile id="upCurrent" x="10" y="104"/>
+	<mx:DataGrid allowMultipleSelection="true" x="10" y="282" width="311" id="dgFriendsCurrent" height="155">
+		<mx:columns>
+			<mx:DataGridColumn headerText="ID" dataField="uid"/>
+			<mx:DataGridColumn headerText="Name" dataField="name"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+	<mx:VRule x="347" y="44" height="381"/>
+	
+	<mx:TextInput x="368" y="44" width="75" id="txtUserID"/>
+	<mx:Button x="451" y="44" label="Get User Profile" click="getUserProfile(txtUserID.text)"/>
+	<mx:Button x="575" y="44" label="Get Friends of User" click="getFriendsOfUser(txtUserID.text)"/>
+	<local:UserProfile id="upRequested" x="368" y="104"/>
+	<mx:DataGrid x="368" y="282" width="311" id="dgFriendsUser" height="155">
+		<mx:columns>
+			<mx:DataGridColumn headerText="ID" dataField="uid"/>
+			<mx:DataGridColumn headerText="Name" dataField="name"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+</mx:Application>
