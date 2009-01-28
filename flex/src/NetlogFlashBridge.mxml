@@ -55,8 +55,9 @@
 				
 				_nlBridge.removeEventListener(NLBridgeEvents.CURRENT_USER, onCurrentUser);
 				
-				upCurrent.txtDisplayName.text = _nlBridge.nluser.displayName;
-				upCurrent.txtID.text = _nlBridge.nluser.id;
+				upCurrent.title = "User Profile (" + _nlBridge.nluser.id + ")";
+				upCurrent.txtDisplayName.text = _nlBridge.nluser.displayName + " (" + _nlBridge.nluser.gender + ")";
+				upCurrent.txtEmail.text = "";
 				upCurrent.txtName.text = _nlBridge.nluser.givenName + " " + _nlBridge.nluser.familyName;
 				upCurrent.txtOwner.text = String(_nlBridge.nluser.isOwner);
 				upCurrent.txtViewer.text = String(_nlBridge.nluser.isViewer);
@@ -81,8 +82,9 @@
 				
 				var nluRequested:NLUser = e.data as NLUser;
 				
-				upRequested.txtDisplayName.text = nluRequested.displayName;
-				upRequested.txtID.text = nluRequested.id;
+				upRequested.title = "User Profile (" + nluRequested.id + ")";
+				upRequested.txtDisplayName.text = nluRequested.displayName + " (" + nluRequested.gender + ")";
+				upRequested.txtEmail.text = "";
 				upRequested.txtName.text = nluRequested.givenName + " " + nluRequested.familyName;
 				upRequested.txtOwner.text = String(nluRequested.isOwner);
 				upRequested.txtViewer.text = String(nluRequested.isViewer);

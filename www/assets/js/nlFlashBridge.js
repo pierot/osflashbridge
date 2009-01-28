@@ -1,6 +1,10 @@
 var oOwner = null;
 var oFlash = null;
 var isFlashReady = false;
+var oEnv;
+var oURL;
+var sDomain = "";
+var oUserProfileParams;
 
 //***********************************************************************************************************//	
 
@@ -8,15 +12,15 @@ gadgets.util.registerOnLoadHandler(osInit);
 
 function osInit() 
 {
+	oEnv = opensocial.getEnvironment();
+	oURL = gadgets.util.getUrlParameters();
+	
 	NLFlashBridgeInit();
 	
 	// gadgets.window.adjustHeight();
 	
 	// opensocial.requestPermission(permissions, reason, opt_callback);
 	// opensocial.Enum.Gender
-	// opensocial.Environment.getDomain();
-	// opensocial.Email.Field
-	// Messages
 }
 
 //***********************************************************************************************************//	
@@ -24,6 +28,17 @@ function osInit()
 function NLFlashBridgeInit()
 {
 	trace("NLFlashBridgeInit");
+	
+	// SETTINGS
+	sDomain = oEnv.getDomain();
+	
+	oUserProfileParams = {};
+	oUserProfileParams[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = [opensocial.Person.Field.GENDER];
+	// oUserProfileParams[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = [opensocial.Person.Field.EMAILS];
+	
+	// trace(oEnv.supportsField(opensocial.Environment.ObjectType.PERSON, opensocial.Person.Field.GENDER));
+	// trace(oEnv.supportsField(opensocial.Environment.ObjectType.PERSON, opensocial.Person.Field.EMAILS)); // false
+	// trace(oEnv.supportsField(opensocial.Environment.ObjectType.MESSAGE_TYPE, opensocial.Message.Field.EMAILS)); // false
 }
 
 function NLFlashBridgeFlashReady()
@@ -50,14 +65,9 @@ function NLFlashBridgeCurrentUser()
 {
 	trace("NLFlashBridgeCurrentUser");
 	
-	var req = opensocial.newDataRequest();
-	req.add(req.newFetchPersonRequest(opensocial.IdSpec.PersonId.OWNER), "current_user");
-	req.send(function(resp)
+	NLFlashBridgeGenericUserProfile(opensocial.IdSpec.PersonId.OWNER, function(oUser)
 	{
-		var oOwnerResp = resp.get("current_user");
-		oOwner = oOwnerResp.getData();
-
-		NLFlashBridgeFlashDispatcher("onCurrentUser", oOwner);
+		NLFlashBridgeFlashDispatcher("onCurrentUser", oUser);
 	});
 }
 
@@ -65,14 +75,26 @@ function NLFlashBridgeUserProfile(userid)
 {
 	trace("NLFlashBridgeUserProfile");
 	
+	NLFlashBridgeGenericUserProfile(userid, function(oUser)
+	{
+		NLFlashBridgeFlashDispatcher("onUserProfile", oUser);
+	});
+}
+
+function NLFlashBridgeGenericUserProfile(userid, callback) 
+{
+	trace("NLFlashBridgeGenericUserProfile");
+	
 	var req = opensocial.newDataRequest();
-	req.add(req.newFetchPersonRequest(userid), "user");
+	req.add(req.newFetchPersonRequest(userid, oUserProfileParams), "user");
 	req.send(function(resp)
 	{
 		var oUserResp = resp.get("user");
 		var oUser = oUserResp.getData();
 
-		NLFlashBridgeFlashDispatcher("onUserProfile", oUser);
+		// inspect(oUser);
+
+		callback(oUser);
 	});
 }
 
@@ -81,11 +103,13 @@ function NLFlashBridgeFriends(userid)
 	trace("NLFlashBridgeFriends");
 	
   	var req = opensocial.newDataRequest();
-  	req.add(req.newFetchPeopleRequest(opensocial.newIdSpec({"userId": userid, "groupId": "FRIENDS"})), "get_friends");
+  	req.add(req.newFetchPeopleRequest(opensocial.newIdSpec({"userId": userid, "groupId": "FRIENDS"}), oUserProfileParams), "get_friends");
 	req.send(function(resp)
 	{
 		var arrFriends = resp.get('get_friends').getData(); 
-
+		
+		// inspect(arrFriends);
+		
 		NLFlashBridgeFlashDispatcher("onFriends", arrFriends.array_);
 	});
 }
