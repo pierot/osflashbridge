@@ -1,8 +1,10 @@
 var oOwner = null;
+var oViewer = null;
 var oFlash = null;
 var isFlashReady = false;
 var oEnv;
 var oURL;
+var oURLParams;
 var sDomain = "";
 var oUserProfileParams;
 
@@ -14,6 +16,7 @@ function osInit()
 {
 	oEnv = opensocial.getEnvironment();
 	oURL = gadgets.util.getUrlParameters();
+	oURLParams = gadgets.views.getParams();
 	
 	NLFlashBridgeInit();
 	
@@ -36,9 +39,10 @@ function NLFlashBridgeInit()
 	oUserProfileParams[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = [opensocial.Person.Field.GENDER];
 	// oUserProfileParams[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = [opensocial.Person.Field.EMAILS];
 	
-	// trace(oEnv.supportsField(opensocial.Environment.ObjectType.PERSON, opensocial.Person.Field.GENDER));
 	// trace(oEnv.supportsField(opensocial.Environment.ObjectType.PERSON, opensocial.Person.Field.EMAILS)); // false
 	// trace(oEnv.supportsField(opensocial.Environment.ObjectType.MESSAGE_TYPE, opensocial.Message.Field.EMAILS)); // false
+	
+	inspect(oURLParams);
 }
 
 function NLFlashBridgeFlashReady()
@@ -61,12 +65,26 @@ function NLFlashBridgeLanguage()
 	trace("NLFlashBridgeLanguage is " + gadgets.Prefs.getLang());
 }
 
+function NLFlashBridgeOwner()
+{
+	trace("NLFlashBridgeOwner");
+	
+	NLFlashBridgeGenericUserProfile(opensocial.IdSpec.PersonId.OWNER, function(oUser)
+	{
+		oOwner = oUser;
+		
+		NLFlashBridgeFlashDispatcher("onOwner", oUser);
+	});
+}
+
 function NLFlashBridgeCurrentUser() 
 {
 	trace("NLFlashBridgeCurrentUser");
 	
-	NLFlashBridgeGenericUserProfile(opensocial.IdSpec.PersonId.OWNER, function(oUser)
+	NLFlashBridgeGenericUserProfile(opensocial.IdSpec.PersonId.VIEWER, function(oUser)
 	{
+		oViewer = oUser;
+		
 		NLFlashBridgeFlashDispatcher("onCurrentUser", oUser);
 	});
 }
@@ -86,13 +104,12 @@ function NLFlashBridgeGenericUserProfile(userid, callback)
 	trace("NLFlashBridgeGenericUserProfile");
 	
 	var req = opensocial.newDataRequest();
+	
 	req.add(req.newFetchPersonRequest(userid, oUserProfileParams), "user");
-	req.send(function(resp)
+	req.send(function(oResp)
 	{
-		var oUserResp = resp.get("user");
-		var oUser = oUserResp.getData();
-
-		// inspect(oUser);
+		var oUserResp = oResp.get("user");
+		var oUser = oUserResp.getData(); inspect(oUser);
 
 		callback(oUser);
 	});
@@ -100,13 +117,14 @@ function NLFlashBridgeGenericUserProfile(userid, callback)
 
 function NLFlashBridgeFriends(userid)
 {
-	trace("NLFlashBridgeFriends");
+	trace("NLFlashBridgeFriends for " + userid);
 	
-  	var req = opensocial.newDataRequest();
-  	req.add(req.newFetchPeopleRequest(opensocial.newIdSpec({"userId": userid, "groupId": "FRIENDS"}), oUserProfileParams), "get_friends");
-	req.send(function(resp)
+  	var oReq = opensocial.newDataRequest();
+  	
+  	oReq.add(oReq.newFetchPeopleRequest(opensocial.newIdSpec({"userId": userid, "groupId": "FRIENDS"}), oUserProfileParams), "get_friends");
+	oReq.send(function(oResp)
 	{
-		var arrFriends = resp.get('get_friends').getData(); 
+		var arrFriends = oResp.get('get_friends').getData(); 
 		
 		// inspect(arrFriends);
 		
@@ -114,26 +132,26 @@ function NLFlashBridgeFriends(userid)
 	});
 }
 
-function NLFlashBridgePostActivity(actname)
+function NLFlashBridgePostActivity(actname, keys, title, message)
 {
 	trace("NLFlashBridgePostActivity (" + actname + ")");
 	
-	var sMessage = new gadgets.Prefs().getMsg(actname);
-	var params = {};
-	var keyvalues = {"URL": "http://www.proximity.bbdo.be", "Subject": oOwner, "Subject.DisplayName": oOwner.getDisplayName()};
+	var oParams = {};
 	
-	// params[opensocial.Activity.Field.TITLE_ID] = actname;
-	// params[opensocial.Activity.Field.TEMPLATE_PARAMS] = keyvalues;
-	
-	for(var i in keyvalues)
-		sMessage = sMessage.split("${" + i + "}").join(keyvalues[i]);
-	
-	params[opensocial.Activity.Field.TITLE] = "NetLog Flash Bridge";
-	params[opensocial.Activity.Field.BODY] = sMessage;
-	
-	var activity = opensocial.newActivity(params); inspect(activity);
+	message = actname.length > 0 ? new gadgets.Prefs().getMsg(actname) : message;
 
-	opensocial.requestCreateActivity(activity, opensocial.CreateActivityPriority.HIGH, function()
+	// oParams[opensocial.Activity.Field.TITLE_ID] = actname;
+	// oParams[opensocial.Activity.Field.TEMPLATE_PARAMS] = keys;
+
+	for(var i in keys)
+		message = message.split("${" + i + "}").join(keys[i]);
+
+	oParams[opensocial.Activity.Field.TITLE] = title;
+	oParams[opensocial.Activity.Field.BODY] = message;
+	
+	var oActivity = opensocial.newActivity(oParams); inspect(oActivity);
+
+	opensocial.requestCreateActivity(oActivity, opensocial.CreateActivityPriority.HIGH, function()
   	{
   		trace("NLFlashBridgePostActivity Posted");
   		
@@ -141,22 +159,23 @@ function NLFlashBridgePostActivity(actname)
   	});
 }
 
-function NLFlashBridgeSendMessage(title, body, recipients, messagetype)
+function NLFlashBridgeSendMessage(title, body, recipients, messagetype, params)
 {
 	trace("NLFlashBridgeSendMessage");
 	
-	var params = {};
+	var oParams = {};
+	inspect(Netlog);
+	oParams[Netlog.Message.Field.TYPE] = Netlog.Message.Type.NOTIFICATION;
+	oParams[Netlog.Message.Field.TITLE] = title;
+	oParams[Netlog.Message.Field.PARAMS] = params;
+             
+	var oMessage = Netlog.newMessage(body, oParams); inspect(oMessage);
 	
-	params[opensocial.Message.Field.TYPE] = messagetype;
-	params[opensocial.Message.Field.TITLE] = title;
-	
-	var message = opensocial.newMessage(body, params); inspect(message);
-	
-	opensocial.requestSendMessage(recipients, message, function(resp)
+	Netlog.requestSendMessage(recipients, oMessage, function(oResp)
   	{  		
-  		if(resp.hadError())
+  		if(oResp.hadError())
   		{ 
-  			trace(resp.getErrorMessage()); 
+  			trace(oResp.getErrorMessage()); 
   			
   			NLFlashBridgeFlashDispatcher("onMessageSentFailed");
   		} 
@@ -166,6 +185,65 @@ function NLFlashBridgeSendMessage(title, body, recipients, messagetype)
   			  		
 	  		NLFlashBridgeFlashDispatcher("onMessageSent");
 	  	}
+  	});
+	
+	/*
+	oParams[opensocial.Message.Field.TYPE] = messagetype;
+	oParams[opensocial.Message.Field.TITLE] = title;
+	
+	var oMessage = opensocial.newMessage(body, oParams); inspect(oMessage);
+	
+	opensocial.requestSendMessage(recipients, oMessage);
+  	*/
+}
+
+function NLFlashBridgeAddData(userid, key, value)
+{
+	trace("NLFlashBridgeAddData"); 
+	
+	var oReq = opensocial.newDataRequest();
+	
+  	oReq.add(oReq.newUpdatePersonAppDataRequest(userid, key, value));
+  	oReq.send(function(oResp)
+  	{
+     	if(oResp.hadError()) 
+     	{
+       		trace("NLFlashBridgeAddData Error : " + oResp.getError());
+       		
+       		NLFlashBridgeDispatcher("onAppDataSaveFailed");
+     	}
+     	else
+     	{
+			trace("NLFlashBridgeAddData Saved");
+			
+			NLFlashBridgeDispatcher("onAppDataSave");
+     	}
+  	});
+}
+
+function NLFlashBridgeGetData(userid, keys)
+{
+	trace("NLFlashBridgeGetData");
+	
+	var oReq = opensocial.newDataRequest();
+	
+  	oReq.add(oReq.newFetchPersonAppDataRequest(userid, keys), "app_data"); inspect(oReq);
+  	oReq.send(function(oResp)
+  	{  		
+  		var oData = oResp.get("app_data");
+
+     	if(oData.hadError()) 
+     	{
+       		trace("NLFlashBridgeGetData Error : " + oData.getError());
+       		
+       		NLFlashBridgeDispatcher("onAppDataFetchFailed");
+     	}
+     	else
+     	{
+			trace("NLFlashBridgeGetData Fetched");
+			
+			NLFlashBridgeDispatcher("onAppDataFetch", oData.getData());
+     	}
   	});
 }
 
