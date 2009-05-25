@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Panel xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" width="311" height="170" title="User Profile">
-	<mx:Text x="100" y="10" width="181" id="txtDisplayName"/>
-	<mx:Text x="100" y="34" width="181" id="txtName"/>
-	<mx:Text x="100" y="58" width="181" id="txtEmail"/>
-	<mx:Text x="57" y="98" width="50" id="txtOwner"/>
-	<mx:Text x="170" y="98" width="50" id="txtViewer"/>
-	<mx:Label x="10" y="98" text="Owner"/>
-	<mx:Label x="122" y="98" text="Viewer"/>
-	<mx:Image x="10" y="10" width="80" height="80" id="imThumb"/>
-</mx:Panel>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="225" height="121" backgroundColor="#999999">
+	<mx:Text x="88" y="10" width="127" id="txtDisplayName" height="69"/>
+	<mx:Text x="57" y="90" width="38" id="txtOwner"/>
+	<mx:Text x="150" y="90" width="41" id="txtViewer"/>
+	<mx:Label x="10" y="90" text="Owner"/>
+	<mx:Label x="102" y="90" text="Viewer"/>
+	<mx:Image x="10" y="10" width="70" height="70" id="imThumb"/>
+</mx:Canvas>

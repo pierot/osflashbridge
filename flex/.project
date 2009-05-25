@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>NetlogFlashBridge</name>
+	<name>OpenSocialFlashBridge</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -22,9 +22,14 @@
 			<location>/Users/pierot/Projects/NLFlashBridge/www/assets/swf</location>
 		</link>
 		<link>
+			<name>bin-release2</name>
+			<type>2</type>
+			<location>/Volumes/data/Users/pieterm/Documents/Projects/OSFlashBridge/www/assets/swf</location>
+		</link>
+		<link>
 			<name>bin-release</name>
 			<type>2</type>
-			<location>/Users/pierot/Projects/NetLogFashBridge/www/assets/swf</location>
+			<location>/Volumes/data/Users/pieterm/Documents/Projects/NLFlashBridge/www/assets/swf</location>
 		</link>
 	</linkedResources>
 </projectDescription>
