@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" initialize="init()" xmlns:local="*">
+	
+	<mx:Script>
+		<![CDATA[
+			import be.wellconsidered.apis.osbridge.data.OSUser;
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import be.wellconsidered.apis.osbridge.events.OSBridgeEvents;
+			import be.wellconsidered.apis.osbridge.OSBridge;
+		
+			import be.wellconsidered.apis.googlefriendconnect.events.GoogleFriendConnectEvent;
+			import be.wellconsidered.apis.googlefriendconnect.GoogleFriendConnect;
+
+			import be.wellconsidered.logging.Logger;
+			
+			private var _gfc:GoogleFriendConnect;
+			private var _os:OSBridge;
+			
+			private function init():void
+			{
+				Logger.isVerbose = true;
+				Logger.log("Init Google Friend Connect");
+	
+				_gfc = new GoogleFriendConnect();
+				_gfc.init();
+				
+				_gfc.addEventListener(GoogleFriendConnectEvent.CONNECTED, onGFCConnect, false, 0, true);
+				_gfc.addEventListener(GoogleFriendConnectEvent.DISCONNECTED, onGFCDisConnect, false, 0, true);
+			}
+			
+			private function disconnectToGFC():void
+			{
+				_gfc.disconnect();
+			}
+			
+			private function connectToGFC():void
+			{
+				_gfc.connect();
+			}
+			
+			private function onGFCConnect(e:GoogleFriendConnectEvent):void
+			{
+				Logger.log("GFC Connected (" + _gfc.securitytoken + ")");
+				
+				btnConnect.enabled = false;
+				btnDisconnect.enabled = true;
+				
+				// OPENSOCIAL CAN BE USED
+				_os = new OSBridge();
+				
+				_os.addEventListener(OSBridgeEvents.INIT, onOSInit, false, 0, true);
+				
+				_os.init();
+			}
+			
+			private function getCurrentUserInfo():void
+			{
+				_os.addEventListener(OSBridgeEvents.CURRENT_USER, onCurrentUser, false, 0, true);
+				_os.addEventListener(OSBridgeEvents.CURRENT_USER_NOT_LOGGED_IN, onCurrentUserNotLoggedIn, false, 0, true);
+				
+				_os.getCurrentUser();
+			}
+			
+			private function onCurrentUserNotLoggedIn(e:OSBridgeEvents):void
+			{
+				Logger.log("On Current User not Logged In");
+				
+				Alert.show("On Current User not Logged In");
+			}
+			
+			private function onCurrentUser(e:OSBridgeEvents):void
+			{
+				Logger.log("On Current User");
+				
+				_os.removeEventListener(OSBridgeEvents.CURRENT_USER, onCurrentUser);
+				
+				upCurrent.txtDisplayName.text = _os.viewer.displayName + " (" + _os.viewer.gender + ") " + " - (" + _os.viewer.id + ")";
+				upCurrent.txtOwner.text = String(_os.viewer.isOwner);
+				upCurrent.txtViewer.text = String(_os.viewer.isViewer);
+				
+				upCurrent.imThumb.load(_os.viewer.thumbnailUrl);
+			}
+			
+			private function onOSInit(e:OSBridgeEvents):void
+			{
+				Logger.log("Init OpenSocial Flash Bridge");
+				
+				btnCurrentUser.enabled = true;
+				
+				getFriendsOfSite();
+			}
+			
+			private function onGFCDisConnect(e:GoogleFriendConnectEvent):void
+			{
+				Logger.log("GFC DisConnected");
+				
+				btnConnect.enabled = true;
+				btnDisconnect.enabled = false;
+				btnCurrentUser.enabled = false;
+			}
+			
+			private function getFriendsOfSite():void
+			{
+				_os.addEventListener(OSBridgeEvents.FRIENDS_OWNER, onSiteFriends, false, 0, true);
+					
+				_os.getOwnerFriends();
+			}
+			
+			private function onSiteFriends(e:OSBridgeEvents):void
+			{
+				Logger.log("Site Friends");
+				
+				_os.removeEventListener(OSBridgeEvents.FRIENDS, onSiteFriends);
+				
+				var arrcFriends:ArrayCollection = new ArrayCollection();
+				var arrFriends:Array = e.data as Array;
+				
+				for(var i:int = 0; i < arrFriends.length; i++)
+				{
+					var osFriend:OSUser = new OSUser(arrFriends[i]);
+					
+					arrcFriends.addItem({uid: osFriend.id, name: osFriend.displayName + "(" + osFriend.givenName + " " + osFriend.familyName + ")"});
+				}
+				
+				dgFriendsCurrent.dataProvider = arrcFriends;
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Button id="btnConnect" label="Connect with Google Friend Connect" click="connectToGFC()" x="10" y="10" />
+	
+	<mx:Button id="btnCurrentUser" enabled="false" x="10" y="40" label="Get Current User" click="getCurrentUserInfo()"/>
+	<mx:Button x="247" y="10" label="Disconnect with Google Friend Connect" id="btnDisconnect" click="disconnectToGFC()" enabled="false"/>
+	
+	<local:UserProfile id="upCurrent" x="10" y="70"/>
+	
+	<mx:DataGrid x="247" y="70" width="438" height="259" id="dgFriendsCurrent">
+		<mx:columns>
+			<mx:DataGridColumn headerText="ID" dataField="uid"/>
+			<mx:DataGridColumn headerText="Name" dataField="name"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+	<mx:Label x="247" y="42" text="Site Friends"/>
+	
+	<mx:Button x="325" y="40" label="R" id="btnRefresh" click="getFriendsOfSite()"/>
+	
+</mx:Application>
