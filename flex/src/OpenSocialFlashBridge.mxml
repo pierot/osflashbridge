@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" initialize="init()" width="720" height="600" borderColor="#DBDEDF" backgroundGradientAlphas="[1.0, 1.0]" backgroundGradientColors="[#AFAFAF, #858585]" xmlns:local="*">
+	
+	<mx:Script>
+		<![CDATA[
+			
+			import mx.controls.Alert;
+			import mx.collections.ArrayCollection;
+
+			import be.wellconsidered.apis.osbridge.data.*;
+			import be.wellconsidered.apis.osbridge.events.OSBridgeEvents;
+			import be.wellconsidered.apis.osbridge.constants.OSMessageTypes;
+			import be.wellconsidered.apis.osbridge.OSBridge;
+			
+			import be.wellconsidered.logging.Logger;
+			
+			private var _osBridge:OSBridge;
+			
+			private function init():void
+			{
+				Logger.isVerbose = true;
+				Logger.log("OSFlashBridge Application Init");
+				
+				Security.allowDomain("*");
+				Security.allowDomain("nl.api.netlog.com");
+				
+				_osBridge = new OSBridge();
+				_osBridge.addEventListener(OSBridgeEvents.INIT, onInit, false, 0, true);
+				_osBridge.init();
+				
+				var arrcTypes:ArrayCollection = new ArrayCollection();
+				
+				arrcTypes.addItem({label: OSMessageTypes.NOTIFICATION, data: OSMessageTypes.NOTIFICATION});
+				arrcTypes.addItem({label: OSMessageTypes.EMAIL, data: OSMessageTypes.EMAIL});
+				arrcTypes.addItem({label: OSMessageTypes.PRIVATE_MESSAGE, data: OSMessageTypes.PRIVATE_MESSAGE});
+				arrcTypes.addItem({label: OSMessageTypes.PUBLIC_MESSAGE, data: OSMessageTypes.PUBLIC_MESSAGE});
+				
+				cboTypes.dataProvider = arrcTypes;
+			}
+			
+			private function onInit(e:OSBridgeEvents):void
+			{
+				Logger.log("Init OpenSocial Flash Bridge");
+			}
+			
+			private function getCurrentUserInfo():void
+			{
+				_osBridge.addEventListener(OSBridgeEvents.CURRENT_USER, onCurrentUser, false, 0, true);
+				
+				_osBridge.getCurrentUser();
+			}
+			
+			private function getOwnerInfo():void
+			{
+				_osBridge.addEventListener(OSBridgeEvents.OWNER, onOwner, false, 0, true);
+				
+				_osBridge.getOwner();
+			}
+			
+			private function onOwner(e:OSBridgeEvents):void
+			{
+				Logger.log("On Owner");
+				
+				_osBridge.removeEventListener(OSBridgeEvents.OWNER, onOwner);
+				
+				// upCurrent.title = "User Profile (" + _osBridge.owner.id + ")";
+				upCurrent.txtDisplayName.text = _osBridge.owner.displayName + " (" + _osBridge.owner.gender + ") " + " - (" + _osBridge.owner.id + ")";
+				// upCurrent.txtEmail.text = "";
+				// upCurrent.txtName.text = _osBridge.owner.givenName + " " + _osBridge.owner.familyName;
+				upCurrent.txtOwner.text = String(_osBridge.owner.isOwner);
+				upCurrent.txtViewer.text = String(_osBridge.owner.isViewer);
+				
+				upCurrent.imThumb.load(_osBridge.owner.thumbnailUrl);
+			}
+			
+			private function onCurrentUser(e:OSBridgeEvents):void
+			{
+				Logger.log("On Current User");
+				
+				_osBridge.removeEventListener(OSBridgeEvents.CURRENT_USER, onCurrentUser);
+				
+				// upCurrent.title = "User Profile (" + _osBridge.viewer.id + ")";
+				upCurrent.txtDisplayName.text = _osBridge.viewer.displayName + " (" + _osBridge.viewer.gender + ") " + " - (" + _osBridge.viewer.id + ")";
+				// upCurrent.txtEmail.text = "";
+				// upCurrent.txtName.text = _osBridge.viewer.givenName + " " + _osBridge.viewer.familyName;
+				upCurrent.txtOwner.text = String(_osBridge.viewer.isOwner);
+				upCurrent.txtViewer.text = String(_osBridge.viewer.isViewer);
+				
+				upCurrent.imThumb.load(_osBridge.viewer.thumbnailUrl);
+			}
+			
+			private function getUserProfile(userid:String):void
+			{
+				if(userid.length > 0)
+				{
+					_osBridge.addEventListener(OSBridgeEvents.USER_PROFILE, onUserProfile, false, 0, true);
+					
+					_osBridge.getUserProfile(userid);
+				}
+			}
+			
+			private function onUserProfile(e:OSBridgeEvents):void
+			{
+				Logger.log("On User Profile");
+				
+				_osBridge.removeEventListener(OSBridgeEvents.USER_PROFILE, onUserProfile);
+				
+				var osuRequested:OSUser = e.data as OSUser;
+				
+				// upRequested.title = "User Profile (" + osuRequested.id + ")";
+				upRequested.txtDisplayName.text = osuRequested.displayName + " (" + osuRequested.gender + ") " + " - (" + osuRequested.id + ")";
+				// upRequested.txtEmail.text = "";
+				// upRequested.txtName.text = osuRequested.givenName + " " + osuRequested.familyName;
+				upRequested.txtOwner.text = String(osuRequested.isOwner);
+				upRequested.txtViewer.text = String(osuRequested.isViewer);
+				
+				upRequested.imThumb.load(osuRequested.thumbnailUrl); 
+			}
+			
+			private function getFriendsOfCurrentUser():void
+			{
+				if(_osBridge.viewer)
+				{
+					_osBridge.addEventListener(OSBridgeEvents.FRIENDS, onCurrentUserFriends, false, 0, true);
+					
+					_osBridge.getFriends(_osBridge.viewer.id);
+				}
+			}
+			
+			private function onCurrentUserFriends(e:OSBridgeEvents):void
+			{
+				Logger.log("Current User Friends");
+				
+				_osBridge.removeEventListener(OSBridgeEvents.FRIENDS, onCurrentUserFriends);
+				
+				var arrcFriends:ArrayCollection = new ArrayCollection();
+				var arrFriends:Array = e.data as Array;
+				
+				for(var i:int = 0; i < arrFriends.length; i++)
+				{
+					var osFriend:OSUser = new OSUser(arrFriends[i]);
+					
+					arrcFriends.addItem({uid: osFriend.id, name: osFriend.displayName + "(" + osFriend.givenName + " " + osFriend.familyName + ")"});
+				}
+				
+				dgFriendsCurrent.dataProvider = arrcFriends;
+			}
+			
+			private function getFriendsOfUser(userid:String):void
+			{
+				var sUserId:String = "";
+				
+				if(userid.length > 0)
+				{
+					sUserId = userid;
+				}
+				else if(dgFriendsCurrent.selectedItems.length > 0)
+				{
+					sUserId = dgFriendsCurrent.selectedItems[0].uid;
+				}
+				
+				if(sUserId.length > 0)
+				{
+					_osBridge.addEventListener(OSBridgeEvents.FRIENDS, onUserFriends, false, 0, true);
+					
+					_osBridge.getFriends(userid);
+				}
+			}
+			
+			private function onUserFriends(e:OSBridgeEvents):void
+			{
+				Logger.log("User Friends");
+				
+				_osBridge.removeEventListener(OSBridgeEvents.FRIENDS, onUserFriends);
+				
+				var arrcFriends:ArrayCollection = new ArrayCollection();
+				var arrFriends:Array = e.data as Array;
+				
+				for(var i:int = 0; i < arrFriends.length; i++)
+				{
+					var osFriend:OSUser = new OSUser(arrFriends[i]);
+					
+					arrcFriends.addItem({uid: osFriend.id, name: osFriend.displayName + "(" + osFriend.givenName + " " + osFriend.familyName + ")"});
+				}
+				
+				dgFriendsUser.dataProvider = arrcFriends;
+			}
+			
+			private function postActivity():void
+			{
+				_osBridge.addEventListener(OSBridgeEvents.ACTIVITY_POSTED, onActPosted, false, 0, true);
+				
+				_osBridge.postActivity("", null, "Snickers Get On With It!", "Doe mee aan de Snickers wedstrijd en win fantastische prijzen!");
+			}
+			
+			private function onActPosted(e:OSBridgeEvents):void
+			{
+				Logger.log("Activity Posted"); 
+				
+				Alert.show("Activity Posted");
+						
+				_osBridge.removeEventListener(OSBridgeEvents.ACTIVITY_POSTED, onActPosted);
+			}
+			
+			private function sendMessage(bodyCopy:String):void
+			{
+				var arrRecipients:Array = new Array();
+				
+				if(dgFriendsCurrent.selectedItems.length > 0)
+				{
+					for(var i:int = 0; i < dgFriendsCurrent.selectedItems.length; i++)
+					{
+						arrRecipients.push(dgFriendsCurrent.selectedItems[i].uid);
+					}
+				}
+					
+				_osBridge.addEventListener(OSBridgeEvents.MESSAGE_SENT, onMessageSent, false, 0, true);
+				
+				_osBridge.sendMessage(new OSMessage("Doe mee met de Netlog Flash Bridge", bodyCopy, cboTypes.selectedItem.data, {test: "HALLO"}), arrRecipients.length > 0 ? arrRecipients : "65969760");
+			}
+			
+			private function onMessageSent(e:OSBridgeEvents):void
+			{
+				Logger.log("Message Sent");
+				
+				Alert.show("Message Posted");
+						
+				_osBridge.removeEventListener(OSBridgeEvents.MESSAGE_SENT, onMessageSent);
+			}
+			
+			private function saveData():void
+			{
+				_osBridge.addEventListener(OSBridgeEvents.APPDATA_SAVE, function(e:OSBridgeEvents):void{ Logger.log("Data Saved (test => " + new Date().toTimeString() + ")"); });
+				_osBridge.addEventListener(OSBridgeEvents.APPDATA_SAVE_FAILED, function(e:OSBridgeEvents):void{ Logger.log("Data NOT Saved (test => " + new Date().toTimeString() + ")"); });
+				
+				_osBridge.saveAppData(_osBridge.viewer.id, "test", new Date().toTimeString());
+			}
+			
+			private function fetchData():void
+			{
+				_osBridge.addEventListener(OSBridgeEvents.APPDATA_FETCH, function(e:OSBridgeEvents):void{ Logger.log("Data Fetch (test => " + e.data + ")"); });
+				_osBridge.addEventListener(OSBridgeEvents.APPDATA_FETCH_FAILED, function(e:OSBridgeEvents):void{ Logger.log("Data NOT Fetched (test => )"); });
+				
+				_osBridge.fetchAppData(_osBridge.viewer.id, "test");
+			}
+			
+			private function getParams():void
+			{
+				_osBridge.addEventListener(OSBridgeEvents.PARAMDATA_FETCH, onParamFetch);
+				_osBridge.fetchParamData("test");
+			}
+			
+			private function onParamFetch(e:OSBridgeEvents):void
+			{
+				Logger.log("Param Fetched '" + e.data + "'");
+				
+				Alert.show("Param Fetched (" + e.data + ")");
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Text x="10" y="10" text="OpenSocial Flash Bridge" fontFamily="Arial" fontSize="24" fontWeight="bold" color="#3C0B0B"/>
+	<mx:Text x="10" y="55" text="User info or actions of Viewer or Owner" fontFamily="Arial" fontSize="14" fontWeight="bold" color="#3C0B0B"/>
+	<mx:Text x="10" y="244" text="Friends" fontFamily="Arial" fontSize="14" fontWeight="bold" color="#3C0B0B"/>
+	<mx:Text x="10" y="375" text="Messages / Notifications" fontFamily="Arial" fontSize="14" fontWeight="bold" color="#3C0B0B"/>
+	<mx:Text x="10" y="463" text="Activity (Generic message will be posted)" fontFamily="Arial" fontSize="14" fontWeight="bold" color="#3C0B0B"/>
+	<mx:Text x="10" y="523" text="Get Application Params (via url)" fontFamily="Arial" fontSize="14" fontWeight="bold" color="#3C0B0B"/>
+	<mx:Text x="358" y="244" text="Friends" fontFamily="Arial" fontSize="14" fontWeight="bold" color="#3C0B0B"/>
+	<mx:Text x="361" y="55" text="User info of given UserID" fontFamily="Arial" fontSize="14" fontWeight="bold" color="#3C0B0B"/>
+	<mx:Button x="10" y="553" label="Get Parameters" click="getParams()" width="119"/>
+	<mx:Button x="10" y="115" label="Get VIEWER" click="getCurrentUserInfo()" />
+	<mx:Button x="10" y="175" label="Get Friends" width="97" click="getFriendsOfCurrentUser()"/>
+	<mx:Button x="10" y="493" label="Post Activity" click="postActivity()" width="109"/>
+	<mx:TextInput x="85" y="405" width="255" id="txtMessage" >
+		<mx:text><![CDATA[Develop ook voor Netlog. Met een <a href='http://www.proximity.bbdo.be?test=hallo'>webadres</a>!]]></mx:text>
+	</mx:TextInput>
+	<mx:ComboBox x="85" y="435" width="141" id="cboTypes"></mx:ComboBox>
+	<mx:Button x="234" y="435" label="Send Message" click="sendMessage(txtMessage.text)" width="106"/>
+	<local:UserProfile id="upCurrent" x="115" y="115"/>
+	<mx:DataGrid allowMultipleSelection="true" x="10" y="271" width="330" id="dgFriendsCurrent" height="96">
+		<mx:columns>
+			<mx:DataGridColumn headerText="ID" dataField="uid"/>
+			<mx:DataGridColumn headerText="Name" dataField="name"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+	<mx:VRule x="348" y="45" height="535"/>
+	
+	<mx:TextInput x="423" y="85" width="144" id="txtUserID"/>
+	<mx:Button x="361" y="115" label="Get User Profile" click="getUserProfile(txtUserID.text)"/>
+	<mx:Button x="361" y="145" label="Get Friends" click="getFriendsOfUser(txtUserID.text)"/>
+	<local:UserProfile id="upRequested" x="485" y="115"/>
+	<mx:DataGrid x="358" y="271" width="352" id="dgFriendsUser" height="96">
+		<mx:columns>
+			<mx:DataGridColumn headerText="ID" dataField="uid"/>
+			<mx:DataGridColumn headerText="Name" dataField="name"/>
+		</mx:columns>
+	</mx:DataGrid>
+	<mx:Button x="531" y="10" label="Save Data" visible="false" click="saveData()"/>
+	<mx:Button x="624" y="10" label="FetchData" visible="false" click="fetchData()"/>
+	<mx:Button x="10" y="145" label="Get OWNER" click="getOwnerInfo()" width="97"/>
+	<mx:Label x="361" y="87" text="User ID:"/>
+	<mx:Label x="10" y="407" text="Message:"/>
+	<mx:Label x="10" y="437" text="Type:"/>
+	
+</mx:Application>
