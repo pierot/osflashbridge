@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<Module>
+	<ModulePrefs title="NLFlashBridge" title_url="http://www.proximity.bbdo.be" width="720" height="600" author="Proximity BBDO" author_email="pieterm@dmc.be">
+		<Require feature="opensocial-0.8" />
+		<Require feature="flash" />
+		<Require feature="views" />
+		<Require feature="netlog" />
+		<Require feature="dynamic-height"/>
+		<Require feature="settitle" />
+		
+		<!--<Locale messages="http://stream.microsite.be/netlog/messages.xml"/>-->
+	</ModulePrefs>
+	
+	<Content type="html" view="canvas">
+		<![CDATA[
+		
+		<script type="text/javascript" src="http://stream.microsite.be/dev/netlog/lib/jquery-1.3.min.js"></script>
+		<script type="text/javascript" src="http://stream.microsite.be/dev/netlog/lib/swfobject.js"></script>
+		
+		<script type="text/javascript" src="http://stream.microsite.be/dev/netlog/lib/osFlashBridge/osFlashBridge.utils.js"></script>
+		<script type="text/javascript" src="http://stream.microsite.be/dev/netlog/lib/osFlashBridge/osFlashBridge.js"></script>
+		
+		<script type="text/javascript">
+		
+			var flashvars = { };
+			var params = { allowFullScreen : true, allowScriptAccess: "always" };
+			var attributes = { id: "flash_flash" };
+			
+			swfobject.embedSWF("http://stream.microsite.be/dev/netlog/assets/swf/OpenSocialFlashBridge.swf", "flash_alternative", "720", "600", "9.0.0", "http://stream.microsite.be/dev/netlog/assets/swf/playerProductInstall.swf", flashvars, params, attributes);
+			
+		</script>
+		
+		<div id="flash_alternative">
+			Alternative
+		</div>
+					
+		]]>
+	</Content>
+	
+	<Content type="html" view="profile">
+		<![CDATA[
+		
+		
+							
+		]]>
+	</Content>
+</Module>

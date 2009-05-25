@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+	<head>
+		<title>Google Friend Connect to AS3</title>
+		
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		
+		<link rel="stylesheet" href="assets/css/style.css" media="all" />
+	
+		<!-- -------------------------------- AS3 GOOGLE FRIEND CONNECT EXTERNAL -------------------------------- --> 	
+	
+		<script type="text/javascript" src="lib/jquery-1.3.min.js"></script>
+		
+		<script type="text/javascript" src="lib/swfobject.js"></script>
+		
+		<!-- -------------------------------- AS3 GOOGLE FRIEND CONNECT -------------------------------- --> 
+		
+		<script type="text/javascript" src="lib/osFlashBridge/osFlashBridge.js"></script>
+		<script type="text/javascript" src="lib/osFlashBridge/osFlashBridge.utils.js"></script>
+		<script type="text/javascript" src="lib/osFlashBridge/osFlashBridge.gfc.js"></script>
+		
+		<script type="text/javascript">
+			
+			var siteLoc = "/dev/as3googlefriendconnect/";
+			var siteID = "00065209452276957154";
+						
+		</script>
+		
+		<script src="http://www.google.com/jsapi"></script>
+		<script type="text/javascript">
+			google.load('friendconnect', '0.8');
+		</script>
+		<script type="text/javascript">    
+			google.friendconnect.container.setParentUrl(siteLoc);
+			google.friendconnect.container.loadOpenSocialApi({
+				site: siteID,
+				onload: GFCFlashBridgeTokenFetched
+			});
+		</script>
+		<!-- -------------------------------- AS3 GOOGLE FRIEND CONNECT -------------------------------- -->
+		
+		<script type="text/javascript">
+			
+			var flashvars = { };
+			var params = {allowFullScreen : true};
+			var attributes = {id: "flash_flash"};
+			
+			swfobject.embedSWF("assets/swf/GFCFlashBridge.swf", "flash_alternative", "100%", "100%", "9.0.0", "", flashvars, params, attributes);
+			
+		</script>
+		
+		<!-- -------------------------------- AS3 GOOGLE FRIEND CONNECT EXTERNAL -------------------------------- --> 	
+		
+	</head>
+	<body>
+
+		<div id="flash_alternative">
+			<p> <small>Voor deze site heb je de flash plugin van Adobe nodig. Deze kan je <a href="http://www.adobe.com/go/getflashplayer">hier gratis en snel downloaden</a>.<br />
+			Als je zeker bent dat je de flash plugin geinstalleerd hebt kan je kan ook binnengaan zonder <a href="?detectflash=false">flash plugin detectie</a>.</small></p>
+		</div>
+			
+	</body>
+</html>

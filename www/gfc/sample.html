@@ -1,0 +1,232 @@
+<html>
+  <head>
+    <style type="text/css">
+      body {font-family: Arial, Helvetica, sans-serif; font-weight:normal; text-align:center;}
+
+      h2 {color: #4A77D1; font-size: 18px; font-weight: normal}
+      h3 {font-size: 13px; font-weight: normal}
+      h4 {color: #666666; font-size: 11px; font-weight: normal; padding:0 0 4px 0; margin:0;}
+
+      .memberPhoto {
+        width: 45px;
+        height: 45px;
+        border: 0px;
+      }
+
+      .leftbar {
+        float:left;
+        width: 40%;
+        border-right: 1px solid grey;
+        padding-right: 50px;
+      }
+
+      .rightbar {
+        float: left;
+        padding-left: 50px;
+        width: 40%;
+      }
+
+      .main {
+        width: 700px;
+        margin: 0 auto;
+        padding: 5px;
+        text-align:left;
+      }
+
+      #profile {
+        font-size:13px;
+        margin: 0;
+        padding: 10px 15px;
+      }
+	  
+      #memberstate: {
+	font-size:13px;
+        margin: 0;
+        height: 45px;
+        padding: 15px;
+      }
+
+      #members {
+        padding: 5px 80px;
+        height: 59px;
+      }
+
+      #membersText {
+        padding: 0px 87px;
+        margin-top: -10px;
+      }
+
+      #colorTable {
+        width: 100%;
+      }
+
+      #colorPicker {
+        margin: 20px 40px;
+      }
+
+      .cell {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #E5ECF9;
+      }
+
+      .item {
+        padding: 5px;
+        font-size: smaller;
+      }
+    </style>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load('friendconnect', '0.8');
+    </script>
+  </head>
+  <body>
+   <div class="main">
+
+     <h2> Welcome to the Friend Connect integration example site</h2>
+     <h3> On this site, you'll find example of the types of in-page integrations that are possible with Friend Connect. Check out the source of the page to get a detailed look under the hood.</h3>
+     <div id="members">&nbsp;&nbsp;Loading...</div>
+     <div id="membersText"><h4>Recent Members</h4></div>
+
+     <div class="leftbar">
+
+       <div id="memberstate"></div>
+
+       <div id="profile"></div>  
+
+        <h3> Once you've joined - you'll notice that an activity is displayed to the right indicating that you have joined. You can generate another activity by choosing a color below and pressing the &quot;Pick!&quot; button:       
+        </h3>
+
+       <div id="colorPicker">
+         <table id="colorTable" cellspacing="10"> 
+           <tr> 
+             <td><div class="cell" style="background-color: red; border: 3px solid #666666" onclick="selectColor(this, 'red')" id="redCell"></td>
+
+             <td><div class="cell" style="background-color: blue" onclick="selectColor(this, 'blue')"></td>
+             <td><div class="cell" style="background-color: green" onclick="selectColor(this, 'green')"></td>
+             <td width="10px" rowspan="2"><button onClick="createActivity()">Pick!</button></td>
+           </tr>
+           <tr>
+             <td><div class="cell" style="background-color: lightblue" onclick="selectColor(this, 'light blue')"></td>
+             <td><div class="cell" style="background-color: gold" onclick="selectColor(this, 'gold')"></td>
+             <td><div class="cell" style="background-color: purple" onclick="selectColor(this, 'purple')"></td>
+
+           </tr>
+         </table>
+       </div>      
+
+     </div>
+       
+     <div class="rightbar">
+       <br>
+       <h4> Latest site activity </h4>
+       <div id="activities"></div>
+
+     </div>
+
+   </div>
+
+
+   <script type="text/javascript">
+    var SITE_ID = '00065209452276957154';
+    var viewer, ownerFriends, activities;
+    google.friendconnect.container.setParentUrl('/dev/as3googlefriendconnect/' /* location of rpc_relay.html and canvas.html */);
+    google.friendconnect.container.loadOpenSocialApi({ 
+            site: SITE_ID,
+            onload: function() { initAllData(); }});
+
+    function initAllData() {
+      var params = {};
+      params[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] =
+        [opensocial.Person.Field.ID,opensocial.Person.Field.NAME,opensocial.Person.Field.THUMBNAIL_URL,opensocial.Person.Field.PROFILE_URL];
+      var req = opensocial.newDataRequest();
+      req.add(req.newFetchPersonRequest('VIEWER', params), 'viewer');
+      req.add(req.newFetchPeopleRequest(
+        new opensocial.IdSpec({'userId' : 'OWNER', 'groupId' : 'FRIENDS'}), params), 
+        'ownerFriends');
+      req.add(req.newFetchActivitiesRequest(new opensocial.IdSpec({'userId' : 'OWNER', 'groupId' : 'FRIENDS'})), 'activities');
+      req.send(setupData);
+    };
+
+    function setupData(data) {
+      ownerFriends = data.get('ownerFriends').getData().asArray();
+      var html = "";
+      for (var i = 0; i < ownerFriends.length && i < 8; i++) {
+        var person = ownerFriends[i];
+        html += "<a title='" + person.getField("displayName") + "' href='" + person.getField("profileUrl") + "'>";
+        html += "<img class='memberPhoto' src='" + person.getField("thumbnailUrl")  + "'/>";
+        html += "</a>&nbsp;&nbsp;";
+      };
+
+      document.getElementById('members').innerHTML = html;
+	  
+      viewer = data.get('viewer').getData();
+      if (viewer) {
+        document.getElementById('memberstate').innerHTML = 
+        '<h3>Great you have joined the site, '  +  
+         viewer.getField("displayName") + '!</h3>' ;
+      } else {
+        document.getElementById('memberstate').innerHTML = 
+        '<h3>To get started, click the button below to become a member of the site. After joining, you will automatically appear above as a recent member.</h3>';
+      }
+	  
+      viewer = data.get('viewer').getData();
+      if (viewer) {
+        document.getElementById('profile').innerHTML = 
+        '<img align="left" src="' + viewer.getField("thumbnailUrl")  + '">' +
+        '<b>Salam ' +  viewer.getField("displayName") + '!</b><br>' +
+        '<a href="#" onclick="google.friendconnect.requestSettings(); return false;">Settings</a><br>' +
+        '<a href="#" onclick="google.friendconnect.requestInvite(\'Come and pick a color!\'); return false;">Invite</a><br>' +
+        '<a href="#" onclick="google.friendconnect.requestSignOut(); return false;">Sign out</a><br>';
+      } else {
+        google.friendconnect.renderSignInButton({ 'id': 'profile' });
+      }
+
+      activities = data.get('activities').getData();
+      html = "";
+      if (activities) {
+        activities = activities.asArray();
+        for (var i = 0; i < activities.length && i < 6; i++) {
+          var activity = activities[i];
+          var title = activity.getField('title', {escapeType: 'none'});
+          var body = activity.getField('body', {escapeType: 'none'});
+          if (body) {
+              html += "<div class='item'>" + title;
+              html += body + "</div>";
+          } else {
+              html += "<div class='item'>" + title + "</div>";
+          }
+        };
+      } else {
+        html = "<div class='item'>Be the first to pick your color!</div>";
+      }
+
+      document.getElementById('activities').innerHTML = html;
+    };
+
+    var color = "red";
+    var lastColorDiv = document.getElementById("redCell");
+
+    function selectColor(div, newColor) {
+      color = newColor;
+      div.style.border = "3px solid #666666";
+
+      // Remove the last div's border
+      lastColorDiv.style.border = "3px solid #E5ECF9";
+      lastColorDiv = div;
+    };
+
+    function createActivity() {
+      if (viewer) { 
+        var activity = opensocial.newActivity({
+          title: viewer.getDisplayName() 
+              + ' picked <span style="font-weight: bold; color:' + color + '">' 
+              + color + '</span> as their favorite color'});
+        opensocial.requestCreateActivity(activity, "HIGH", 
+          function() { setTimeout(initAllData,1000); });
+      }
+    };
+    </script>
+
+  </body>
+</html>
