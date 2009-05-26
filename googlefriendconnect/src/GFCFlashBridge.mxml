@@ -14,6 +14,7 @@
 			import be.wellconsidered.apis.googlefriendconnect.events.GoogleFriendConnectEvent;
 			import be.wellconsidered.apis.googlefriendconnect.GoogleFriendConnect;
 
+			import be.wellconsidered.logging.events.LoggerEvent;
 			import be.wellconsidered.logging.Logger;
 			
 			private var _gfc:GoogleFriendConnect;
@@ -23,12 +24,21 @@
 			{
 				Logger.isVerbose = true;
 				Logger.log("Init Google Friend Connect");
-	
-				_gfc = new GoogleFriendConnect();
-				_gfc.init();
+				Logger.addEventListener(LoggerEvent.DEBUG, onTrace, false, 0);
 				
+				// GOOGLE FRIEND CONNECT
+				_gfc = new GoogleFriendConnect();
+				
+				_gfc.addEventListener(GoogleFriendConnectEvent.INITED, onGFCInited, false, 0, true);
 				_gfc.addEventListener(GoogleFriendConnectEvent.CONNECTED, onGFCConnect, false, 0, true);
 				_gfc.addEventListener(GoogleFriendConnectEvent.DISCONNECTED, onGFCDisConnect, false, 0, true);
+				
+				_gfc.init();
+			}
+			
+			private function onTrace(e:LoggerEvent):void
+			{
+				txtTrace.text += String(e.data) + "\n";
 			}
 			
 			private function disconnectToGFC():void
@@ -43,16 +53,19 @@
 			
 			private function onGFCConnect(e:GoogleFriendConnectEvent):void
 			{
-				Logger.log("GFC Connected (" + _gfc.securitytoken + ")");
+				_os.viewer = new OSUser(e.data);
 				
 				btnConnect.enabled = false;
 				btnDisconnect.enabled = true;
+			}
+			
+			private function onGFCInited(e:GoogleFriendConnectEvent):void
+			{
+				Logger.log("GFC Inited (" + _gfc.securitytoken + ")");
 				
 				// OPENSOCIAL CAN BE USED
 				_os = new OSBridge();
-				
 				_os.addEventListener(OSBridgeEvents.INIT, onOSInit, false, 0, true);
-				
 				_os.init();
 			}
 			
@@ -148,5 +161,8 @@
 	<mx:Label x="247" y="42" text="Site Friends"/>
 	
 	<mx:Button x="325" y="40" label="R" id="btnRefresh" click="getFriendsOfSite()"/>
+	
+	<mx:TextArea x="10" y="403" width="465" height="103" id="txtTrace"/>
+	<mx:Label x="10" y="377" text="Debugger"/>
 	
 </mx:Application>

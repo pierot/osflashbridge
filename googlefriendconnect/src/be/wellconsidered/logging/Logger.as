@@ -4,10 +4,10 @@
 
 package be.wellconsidered.logging 
 {
-	//import be.wellconsidered.logging.events.LoggerEvent;
+	import be.wellconsidered.logging.events.LoggerEvent;
 	
-	import flash.events.EventDispatcher;
 	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	
 	public class Logger
 	{
@@ -28,8 +28,10 @@ package be.wellconsidered.logging
 			if(_isverbose)
 				trace(trace_arg);
 				
-			//if(isTrackable)
-				//dispatchEvent(new LoggerEvent(LoggerEvent.TRACK, false, false, convertSpaces(sMessage)));
+			if(isTrackable)
+				dispatchEvent(new LoggerEvent(LoggerEvent.TRACK, false, false, convertSpaces(sMessage)));
+			
+			dispatchEvent(new LoggerEvent(LoggerEvent.DEBUG, false, false, sMessage));
 		}
 		
 		public static function convertSpaces(sMessage:String):String

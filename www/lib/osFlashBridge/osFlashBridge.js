@@ -13,12 +13,10 @@ var oUserProfileParams;
 if(gadgets && gadgets.util)
 	gadgets.util.registerOnLoadHandler(osInit);
 
-function osInit() 
-{
+function osInit() {
 	oEnv = opensocial.getEnvironment();
 	
-	if(gadgets)
-	{
+	if(gadgets) {
 		if(gadgets.util)
 			oURL = gadgets.util.getUrlParameters();
 	
@@ -36,8 +34,7 @@ function osInit()
 
 //***********************************************************************************************************//	
 
-function OSFlashBridgeInit()
-{
+function OSFlashBridgeInit() {
 	trace("OSFlashBridgeInit");
 	
 	// SETTINGS
@@ -54,8 +51,7 @@ function OSFlashBridgeInit()
 	// trace(oEnv.supportsField(opensocial.Environment.ObjectType.MESSAGE_TYPE, opensocial.Message.Field.EMAILS)); // false
 }
 
-function OSFlashBridgeFlashReady()
-{
+function OSFlashBridgeFlashReady() {
 	trace("OSFlashBridgeFlashReady");
 	
 	oFlash = swfobject.getObjectById("flash_flash");
@@ -64,42 +60,33 @@ function OSFlashBridgeFlashReady()
 	OSFlashBridgeFlashDispatcher("onInit");
 }
 
-function OSFlashBridgeCountry()
-{
+function OSFlashBridgeCountry() {
 	trace("OSFlashBridgeCountry is " + gadgets.Prefs.getCountry());
 }
 
-function OSFlashBridgeLanguage()
-{
+function OSFlashBridgeLanguage() {
 	trace("OSFlashBridgeLanguage is " + gadgets.Prefs.getLang());
 }
 
-function OSFlashBridgeOwner()
-{
+function OSFlashBridgeOwner() {
 	trace("OSFlashBridgeOwner");
 	
-	OSFlashBridgeGenericUserProfile(opensocial.IdSpec.PersonId.OWNER, function(oUser)
-	{
+	OSFlashBridgeGenericUserProfile(opensocial.IdSpec.PersonId.OWNER, function(oUser) {
 		oOwner = oUser;
 		
 		OSFlashBridgeFlashDispatcher("onOwner", oUser);
 	});
 }
 
-function OSFlashBridgeCurrentUser() 
-{
+function OSFlashBridgeCurrentUser() {
 	trace("OSFlashBridgeCurrentUser");
 	
-	OSFlashBridgeGenericUserProfile(opensocial.IdSpec.PersonId.VIEWER, function(oUser)
-	{
-		if(oUser)
-		{
+	OSFlashBridgeGenericUserProfile(opensocial.IdSpec.PersonId.VIEWER, function(oUser) {
+		if(oUser) {
 			oViewer = oUser;
 
 			OSFlashBridgeFlashDispatcher("onCurrentUser", oViewer);
-		}
-		else
-		{
+		} else {
 			trace("OSFlashBridgeCurrentUser NOT LOGGED IN");
 			
 			OSFlashBridgeFlashDispatcher("onCurrentUserNotLoggedIn");
@@ -107,12 +94,10 @@ function OSFlashBridgeCurrentUser()
 	});
 }
 
-function OSFlashBridgeUserProfile(userid) 
-{
+function OSFlashBridgeUserProfile(userid) {
 	trace("OSFlashBridgeUserProfile");
 	
-	OSFlashBridgeGenericUserProfile(userid, function(oUser)
-	{
+	OSFlashBridgeGenericUserProfile(userid, function(oUser) {
 		if(oUser)
 			OSFlashBridgeFlashDispatcher("onUserProfile", oUser);
 		else
@@ -120,15 +105,13 @@ function OSFlashBridgeUserProfile(userid)
 	});
 }
 
-function OSFlashBridgeGenericUserProfile(userid, callback) 
-{
+function OSFlashBridgeGenericUserProfile(userid, callback) {
 	trace("OSFlashBridgeGenericUserProfile");
 	
 	var oReq = opensocial.newDataRequest();
 	
 	oReq.add(oReq.newFetchPersonRequest(userid, oUserProfileParams), "user");
-	oReq.send(function(oResp)
-	{
+	oReq.send(function(oResp) {
 		var oUser = oResp.get("user").getData(); 
 		
 		inspect(oUser);
@@ -137,35 +120,29 @@ function OSFlashBridgeGenericUserProfile(userid, callback)
 	});
 }
 
-function OSFlashBridgeOwnerFriends()
-{
+function OSFlashBridgeOwnerFriends() {
 	trace("OSFlashBridgeFriends for OWNER");
 	
-	OSFlashBridgeGenericFriends(opensocial.IdSpec.PersonId.OWNER, function(arrFriends)
-	{
+	OSFlashBridgeGenericFriends(opensocial.IdSpec.PersonId.OWNER, function(arrFriends) {
 		OSFlashBridgeFlashDispatcher("onOwnerFriends", arrFriends);
 	});
 }
 
-function OSFlashBridgeFriends(userid)
-{
+function OSFlashBridgeFriends(userid) {
 	trace("OSFlashBridgeFriends for " + userid);
 	
-  	OSFlashBridgeGenericFriends("userid", function(arrFriends)
-	{
+  	OSFlashBridgeGenericFriends("userid", function(arrFriends) {
 		OSFlashBridgeFlashDispatcher("onFriends", arrFriends);
 	});	
 }
 
-function OSFlashBridgeGenericFriends(userid, callback) 
-{
+function OSFlashBridgeGenericFriends(userid, callback) {
 	trace("OSFlashBridgeGenericFriends (" + userid + ")");
 	
 	var oReq = opensocial.newDataRequest();
 	
 	oReq.add(oReq.newFetchPeopleRequest(new opensocial.IdSpec({"userId": userid, "groupId": "FRIENDS"}), oUserProfileParams), "get_friends");
-	oReq.send(function(oResp)
-	{
+	oReq.send(function(oResp) {
 		var arrFriends = oResp.get("get_friends").getData().asArray();
 		
 		inspect(arrFriends);
@@ -174,8 +151,7 @@ function OSFlashBridgeGenericFriends(userid, callback)
 	});
 }
 
-function OSFlashBridgePostActivity(actname, keys, title, message)
-{
+function OSFlashBridgePostActivity(actname, keys, title, message) {
 	trace("OSFlashBridgePostActivity (" + actname + ")");
 	
 	var oParams = {};
@@ -193,16 +169,14 @@ function OSFlashBridgePostActivity(actname, keys, title, message)
 	
 	var oActivity = opensocial.newActivity(oParams); inspect(oActivity);
 
-	opensocial.requestCreateActivity(oActivity, opensocial.CreateActivityPriority.HIGH, function()
-  	{
+	opensocial.requestCreateActivity(oActivity, opensocial.CreateActivityPriority.HIGH, function() {
   		trace("OSFlashBridgePostActivity Posted");
   		
   		OSFlashBridgeFlashDispatcher("onActivityPosted");
   	});
 }
 
-function OSFlashBridgeSendMessage(title, body, recipients, messagetype, params)
-{
+function OSFlashBridgeSendMessage(title, body, recipients, messagetype, params) {
 	trace("OSFlashBridgeSendMessage");
 	
 	var oParams = {};
@@ -213,16 +187,12 @@ function OSFlashBridgeSendMessage(title, body, recipients, messagetype, params)
              
 	var oMessage = opensocial.newMessage(body, oParams); inspect(oMessage);
 	
-	opensocial.requestSendMessage(recipients, oMessage, function(oResp)
-  	{  		
-  		if(oResp.hadError())
-  		{ 
+	opensocial.requestSendMessage(recipients, oMessage, function(oResp) {  		
+  		if(oResp.hadError()) { 
   			trace(oResp.getErrorMessage()); 
   			
   			OSFlashBridgeFlashDispatcher("onMessageSentFailed");
-  		} 
-  		else
-  		{
+  		} else {
   			trace("OSFlashBridgeSendMessage Sent");
   			  		
 	  		OSFlashBridgeFlashDispatcher("onMessageSent");
@@ -230,23 +200,18 @@ function OSFlashBridgeSendMessage(title, body, recipients, messagetype, params)
   	});
 }
 
-function OSFlashBridgeAddData(userid, key, value)
-{
+function OSFlashBridgeAddData(userid, key, value) {
 	trace("OSFlashBridgeAddData"); 
 	
 	var oReq = opensocial.newDataRequest();
 	
   	oReq.add(oReq.newUpdatePersonAppDataRequest(userid, key, value));
-  	oReq.send(function(oResp)
-  	{
-		if(oResp.hadError()) 
-		{
+  	oReq.send(function(oResp) {
+		if(oResp.hadError()) {
 			trace("OSFlashBridgeAddData Error : " + oResp.getError());
 		
 			OSFlashBridgeFlashDispatcher("onAppDataSaveFailed");
-		}
-		else
-		{
+		} else {
 			trace("OSFlashBridgeAddData Saved");
 		
 			OSFlashBridgeFlashDispatcher("onAppDataSave");
@@ -254,25 +219,20 @@ function OSFlashBridgeAddData(userid, key, value)
   	});
 }
 
-function OSFlashBridgeGetData(userid, keys)
-{
+function OSFlashBridgeGetData(userid, keys) {
 	trace("OSFlashBridgeGetData");
 	
 	var oReq = opensocial.newDataRequest();
 	
   	oReq.add(oReq.newFetchPersonAppDataRequest(userid, keys), "app_data"); inspect(oReq);
-  	oReq.send(function(oResp)
-  	{  		
+  	oReq.send(function(oResp) {  		
 		var oData = oResp.get("app_data");
 		
-		if(oData.hadError()) 
-		{
+		if(oData.hadError()) {
 			trace("OSFlashBridgeGetData Error : " + oData.getError());
 		
 			OSFlashBridgeFlashDispatcher("onAppDataFetchFailed");
-		}
-		else
-		{
+		} else {
 			trace("OSFlashBridgeGetData Fetched");
 		
 			OSFlashBridgeFlashDispatcher("onAppDataFetch", oData.getData());
@@ -280,8 +240,7 @@ function OSFlashBridgeGetData(userid, keys)
   	});
 }
 
-function OSFlashBridgeGetParam(param)
-{
+function OSFlashBridgeGetParam(param) {
 	trace("OSFlashBridgeGetParam " + oURLParams[param]);
 	
 	var sData = oURLParams[param] == undefined ? "" : oURLParams[param];

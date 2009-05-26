@@ -9,10 +9,14 @@ function GFCFlashBridgeFetchToken() {
 function GFCFlashBridgeTokenFetched(st) { 
 	trace("GFCFlashBridgeTokenFetched (" + st + ")");
 
-	securityToken = st;
+	if(securityToken.length == 0) {
+		securityToken = st;
 	
-	if(oFlash)
-		oFlash.onTokenFetched(securityToken);
+		if(oFlash)
+			oFlash.onGFCTokenFetched(securityToken);
+	}
+		
+	GFCFlashBridgeGetLoggedInUser();
 }
 
 function GFCFlashBridgeFlashReady() {
@@ -21,11 +25,32 @@ function GFCFlashBridgeFlashReady() {
 	oFlash = swfobject.getObjectById("flash_flash");
 	
 	if(securityToken.length > 0)
-		oFlash.onTokenFetched(securityToken);
+		oFlash.onGFCTokenFetched(securityToken);
+		
+	GFCFlashBridgeGetLoggedInUser();
+}
+
+function GFCFlashBridgeGetLoggedInUser() {
+	trace("GFCFlashBridgeGetLoggedInUser");
+
+	OSFlashBridgeGenericUserProfile(opensocial.IdSpec.PersonId.VIEWER, function(oUser) {
+		if(oUser) {
+			trace("GFCFlashBridgeGetLoggedInUser LOGGED IN");
+			
+			oViewer = oUser;
+			
+			oFlash.onGFCConnected(oViewer);
+		}
+		else
+			trace("GFCFlashBridgeGetLoggedInUser NOT LOGGED IN");
+	});
 }
 
 function GFCFlashBridgeSignOut() {  
 	trace("GFCFlashBridgeSignOut");
+	
+	securityToken = "";
+	oViewer = null;
 	
 	google.friendconnect.requestSignOut();
 }
@@ -33,11 +58,10 @@ function GFCFlashBridgeSignOut() {
 function GFCFlashBridgeSignIn() {  
 	trace("GFCFlashBridgeSignIn (" + securityToken + ")");
 	
-	// if(securityToken.length > 0) { // WILL ONLY BE CALLED IF JAVASCRIPT WAS QUICKER THAN FLASH OR USER WAS ALREADY SIGNED IN FROM PREVIOUS SESSION
-	//	oFlash.onTokenFetched(securityToken);
-	// } else {
+	if(oViewer)
+		oFlash.onGFCConnected(oViewer);
+	else
 		google.friendconnect.requestSignIn();
-	// }
 }
 
 //***********************************************************************************************************//	
