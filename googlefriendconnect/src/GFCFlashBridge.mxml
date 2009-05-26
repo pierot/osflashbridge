@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" initialize="init()" xmlns:local="*">
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml" layout="absolute" initialize="init()" xmlns:local="*" height="436">
 	
 	<mx:Script>
 		<![CDATA[
@@ -151,7 +151,7 @@
 	
 	<local:UserProfile id="upCurrent" x="10" y="70"/>
 	
-	<mx:DataGrid x="247" y="70" width="438" height="259" id="dgFriendsCurrent">
+	<mx:DataGrid x="247" y="70" width="438" height="190" id="dgFriendsCurrent">
 		<mx:columns>
 			<mx:DataGridColumn headerText="ID" dataField="uid"/>
 			<mx:DataGridColumn headerText="Name" dataField="name"/>
@@ -162,7 +162,7 @@
 	
 	<mx:Button x="325" y="40" label="R" id="btnRefresh" click="getFriendsOfSite()"/>
 	
-	<mx:TextArea x="10" y="403" width="465" height="103" id="txtTrace"/>
-	<mx:Label x="10" y="377" text="Debugger"/>
+	<mx:TextArea x="10" y="318" width="465" height="103" id="txtTrace"/>
+	<mx:Label x="10" y="292" text="Debugger"/>
 	
 </mx:Application>
