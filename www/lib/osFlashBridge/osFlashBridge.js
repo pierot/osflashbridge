@@ -124,10 +124,10 @@ function OSFlashBridgeGenericUserProfile(userid, callback)
 {
 	trace("OSFlashBridgeGenericUserProfile");
 	
-	var req = opensocial.newDataRequest();
+	var oReq = opensocial.newDataRequest();
 	
-	req.add(req.newFetchPersonRequest(userid, oUserProfileParams), "user");
-	req.send(function(oResp)
+	oReq.add(oReq.newFetchPersonRequest(userid, oUserProfileParams), "user");
+	oReq.send(function(oResp)
 	{
 		var oUser = oResp.get("user").getData(); 
 		
@@ -161,10 +161,10 @@ function OSFlashBridgeGenericFriends(userid, callback)
 {
 	trace("OSFlashBridgeGenericFriends (" + userid + ")");
 	
-	var req = opensocial.newDataRequest();
+	var oReq = opensocial.newDataRequest();
 	
 	oReq.add(oReq.newFetchPeopleRequest(new opensocial.IdSpec({"userId": userid, "groupId": "FRIENDS"}), oUserProfileParams), "get_friends");
-	req.send(function(oResp)
+	oReq.send(function(oResp)
 	{
 		var arrFriends = oResp.get("get_friends").getData().asArray();
 		

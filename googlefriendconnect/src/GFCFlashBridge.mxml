@@ -3,9 +3,11 @@
 	
 	<mx:Script>
 		<![CDATA[
-			import be.wellconsidered.apis.osbridge.data.OSUser;
+		
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
+			
+			import be.wellconsidered.apis.osbridge.data.OSUser;
 			import be.wellconsidered.apis.osbridge.events.OSBridgeEvents;
 			import be.wellconsidered.apis.osbridge.OSBridge;
 		
