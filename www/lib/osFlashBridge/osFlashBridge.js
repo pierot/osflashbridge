@@ -1,3 +1,23 @@
+/*
+
+	PARAM_FETCHED + data
+	APP_DATA_FETCHED + data
+	APP_DATA_FETCHED_FAILED
+	APP_DATA_SAVED_FAILED
+	APP_DATA_SAVED
+	MESSAGE_SENT_ERROR
+	MESSAGE_SENT
+	ACTIVITY_POSTED
+	FRIENDS_READY + data
+	OWNER_FRIENDS_READY + data
+	USER_PROFILE_ERROR
+	USER_PROFILE + data
+	CURRENT_USER_NOT_LOGGED_IN
+	CURRENT_USER + data
+	OWNER_READY
+
+*/
+
 var oOwner = null;
 var oViewer = null;
 var oFlash = null;
@@ -226,7 +246,7 @@ function OSFlashBridgeAddData(userid, key, value) {
 		} else {
 			trace("OSFlashBridgeAddData Saved");
 		
-			OSFlashBridgeDispatcher("APP_DATA_SAVED_FAILED");
+			OSFlashBridgeDispatcher("APP_DATA_SAVED");
 			OSFlashBridgeFlashDispatcher("onAppDataSave");
 		}
   	});
