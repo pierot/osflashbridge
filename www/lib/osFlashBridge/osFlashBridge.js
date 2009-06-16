@@ -74,6 +74,7 @@ function OSFlashBridgeOwner() {
 	OSFlashBridgeGenericUserProfile(opensocial.IdSpec.PersonId.OWNER, function(oUser) {
 		oOwner = oUser;
 		
+		OSFlashBridgeDispatcher("OWNER_READY", oUser);
 		OSFlashBridgeFlashDispatcher("onOwner", oUser);
 	});
 }
@@ -85,10 +86,12 @@ function OSFlashBridgeCurrentUser() {
 		if(oUser) {
 			oViewer = oUser;
 
+			OSFlashBridgeDispatcher("CURRENT_USER", oViewer);
 			OSFlashBridgeFlashDispatcher("onCurrentUser", oViewer);
 		} else {
 			trace("OSFlashBridgeCurrentUser NOT LOGGED IN");
 			
+			OSFlashBridgeDispatcher("CURRENT_USER_NOT_LOGGED_IN");
 			OSFlashBridgeFlashDispatcher("onCurrentUserNotLoggedIn");
 		}
 	});
@@ -98,10 +101,13 @@ function OSFlashBridgeUserProfile(userid) {
 	trace("OSFlashBridgeUserProfile");
 	
 	OSFlashBridgeGenericUserProfile(userid, function(oUser) {
-		if(oUser)
+		if(oUser) {
+			OSFlashBridgeDispatcher("USER_PROFILE", oUser);
 			OSFlashBridgeFlashDispatcher("onUserProfile", oUser);
-		else
+		} else {
+			OSFlashBridgeDispatcher("USER_PROFILE_ERROR");
 			OSFlashBridgeFlashDispatcher("onUserProfileError");
+		}
 	});
 }
 
@@ -124,6 +130,7 @@ function OSFlashBridgeOwnerFriends() {
 	trace("OSFlashBridgeFriends for OWNER");
 	
 	OSFlashBridgeGenericFriends(opensocial.IdSpec.PersonId.OWNER, function(arrFriends) {
+		OSFlashBridgeDispatcher("OWNER_FRIENDS_READY", arrFriends);
 		OSFlashBridgeFlashDispatcher("onOwnerFriends", arrFriends);
 	});
 }
@@ -132,6 +139,7 @@ function OSFlashBridgeFriends(userid) {
 	trace("OSFlashBridgeFriends for " + userid);
 	
   	OSFlashBridgeGenericFriends("userid", function(arrFriends) {
+  		OSFlashBridgeDispatcher("FRIENDS_READY", arrFriends);
 		OSFlashBridgeFlashDispatcher("onFriends", arrFriends);
 	});	
 }
@@ -172,6 +180,7 @@ function OSFlashBridgePostActivity(actname, keys, title, message) {
 	opensocial.requestCreateActivity(oActivity, opensocial.CreateActivityPriority.HIGH, function() {
   		trace("OSFlashBridgePostActivity Posted");
   		
+  		OSFlashBridgeDispatcher("ACTIVITY_POSTED");
   		OSFlashBridgeFlashDispatcher("onActivityPosted");
   	});
 }
@@ -191,10 +200,12 @@ function OSFlashBridgeSendMessage(title, body, recipients, messagetype, params) 
   		if(oResp.hadError()) { 
   			trace(oResp.getErrorMessage()); 
   			
+  			OSFlashBridgeDispatcher("MESSAGE_SENT");
   			OSFlashBridgeFlashDispatcher("onMessageSentFailed");
   		} else {
   			trace("OSFlashBridgeSendMessage Sent");
   			  		
+  			OSFlashBridgeDispatcher("MESSAGE_SENT_ERROR");
 	  		OSFlashBridgeFlashDispatcher("onMessageSent");
 	  	}
   	});
@@ -210,10 +221,12 @@ function OSFlashBridgeAddData(userid, key, value) {
 		if(oResp.hadError()) {
 			trace("OSFlashBridgeAddData Error : " + oResp.getError());
 		
+			OSFlashBridgeDispatcher("APP_DATA_SAVED_FAILED");
 			OSFlashBridgeFlashDispatcher("onAppDataSaveFailed");
 		} else {
 			trace("OSFlashBridgeAddData Saved");
 		
+			OSFlashBridgeDispatcher("APP_DATA_SAVED_FAILED");
 			OSFlashBridgeFlashDispatcher("onAppDataSave");
 		}
   	});
@@ -230,11 +243,13 @@ function OSFlashBridgeGetData(userid, keys) {
 		
 		if(oData.hadError()) {
 			trace("OSFlashBridgeGetData Error : " + oData.getError());
-		
+			
+			OSFlashBridgeDispatcher("APP_DATA_FETCHED_FAILED");
 			OSFlashBridgeFlashDispatcher("onAppDataFetchFailed");
 		} else {
 			trace("OSFlashBridgeGetData Fetched");
 		
+			OSFlashBridgeDispatcher("APP_DATA_FETCHED", oData.getData());
 			OSFlashBridgeFlashDispatcher("onAppDataFetch", oData.getData());
 		}
   	});
@@ -245,6 +260,7 @@ function OSFlashBridgeGetParam(param) {
 	
 	var sData = oURLParams[param] == undefined ? "" : oURLParams[param];
 	
+	OSFlashBridgeDispatcher("PARAM_FETCHED", sData);
 	OSFlashBridgeFlashDispatcher("onParamFetch", sData);
 }
 

@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="225" height="121" backgroundColor="#999999">
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" width="225" height="90" backgroundColor="#999999">
 	<mx:Text x="88" y="10" width="127" id="txtDisplayName" height="69"/>
-	<mx:Text x="57" y="90" width="38" id="txtOwner"/>
-	<mx:Text x="150" y="90" width="41" id="txtViewer"/>
-	<mx:Label x="10" y="90" text="Owner"/>
-	<mx:Label x="102" y="90" text="Viewer"/>
 	<mx:Image x="10" y="10" width="70" height="70" id="imThumb"/>
 </mx:Canvas>

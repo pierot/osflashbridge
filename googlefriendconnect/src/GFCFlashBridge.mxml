@@ -90,9 +90,7 @@
 				
 				_os.removeEventListener(OSBridgeEvents.CURRENT_USER, onCurrentUser);
 				
-				upCurrent.txtDisplayName.text = _os.viewer.displayName + " (" + _os.viewer.gender + ") " + " - (" + _os.viewer.id + ")";
-				upCurrent.txtOwner.text = String(_os.viewer.isOwner);
-				upCurrent.txtViewer.text = String(_os.viewer.isViewer);
+				upCurrent.txtDisplayName.text = _os.viewer.displayName + " (" + _os.viewer.id + ")";
 				
 				upCurrent.imThumb.load(_os.viewer.thumbnailUrl);
 			}
@@ -135,7 +133,7 @@
 				{
 					var osFriend:OSUser = new OSUser(arrFriends[i]);
 					
-					arrcFriends.addItem({uid: osFriend.id, name: osFriend.displayName + "(" + osFriend.givenName + " " + osFriend.familyName + ")"});
+					arrcFriends.addItem({uid: osFriend.id, name: osFriend.displayName});
 				}
 				
 				dgFriendsCurrent.dataProvider = arrcFriends;
@@ -151,7 +149,7 @@
 	
 	<local:UserProfile id="upCurrent" x="10" y="70"/>
 	
-	<mx:DataGrid x="247" y="70" width="438" height="190" id="dgFriendsCurrent">
+	<mx:DataGrid x="247" y="70" width="438" height="149" id="dgFriendsCurrent">
 		<mx:columns>
 			<mx:DataGridColumn headerText="ID" dataField="uid"/>
 			<mx:DataGridColumn headerText="Name" dataField="name"/>
@@ -162,7 +160,7 @@
 	
 	<mx:Button x="325" y="40" label="R" id="btnRefresh" click="getFriendsOfSite()"/>
 	
-	<mx:TextArea x="10" y="318" width="465" height="103" id="txtTrace"/>
-	<mx:Label x="10" y="292" text="Debugger"/>
+	<mx:TextArea x="10" y="253" width="465" height="173" id="txtTrace"/>
+	<mx:Label x="10" y="227" text="Debugger"/>
 	
 </mx:Application>

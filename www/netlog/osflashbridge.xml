@@ -41,7 +41,7 @@
 	<Content type="html" view="profile">
 		<![CDATA[
 		
-		
+		<h1>Hello World op uw Profiel</h1>
 							
 		]]>
 	</Content>
