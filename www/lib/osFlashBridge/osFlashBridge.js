@@ -138,11 +138,17 @@ function OSFlashBridgeGenericUserProfile(userid, callback) {
 	
 	oReq.add(oReq.newFetchPersonRequest(userid, oUserProfileParams), "user");
 	oReq.send(function(oResp) {
-		var oUser = oResp.get("user").getData(); 
-		
-		inspect(oUser);
-
-		callback(oUser);
+		if(oResp.hadError()) { 
+			trace("OSFlashBridgeGenericUserProfile NO USER PROFILE OR ERROR");
+			
+			callback(null);
+		} else {
+			var oUser = oResp.get("user").getData(); 
+			
+			inspect(oUser);
+	
+			callback(oUser);
+		}
 	});
 }
 
@@ -158,7 +164,7 @@ function OSFlashBridgeOwnerFriends() {
 function OSFlashBridgeFriends(userid) {
 	trace("OSFlashBridgeFriends for " + userid);
 	
-  	OSFlashBridgeGenericFriends("userid", function(arrFriends) {
+  	OSFlashBridgeGenericFriends(userid, function(arrFriends) {
   		OSFlashBridgeDispatcher("FRIENDS_READY", arrFriends);
 		OSFlashBridgeFlashDispatcher("onFriends", arrFriends);
 	});	
@@ -171,11 +177,17 @@ function OSFlashBridgeGenericFriends(userid, callback) {
 	
 	oReq.add(oReq.newFetchPeopleRequest(new opensocial.IdSpec({"userId": userid, "groupId": "FRIENDS"}), oUserProfileParams), "get_friends");
 	oReq.send(function(oResp) {
-		var arrFriends = oResp.get("get_friends").getData().asArray();
-		
-		inspect(arrFriends);
-
-		callback(arrFriends);
+		if(!oResp.hadError()) { 
+			var arrFriends = oResp.get("get_friends").getData().asArray();
+			
+			inspect(arrFriends);
+	
+			callback(arrFriends);
+		} else {
+			trace("OSFlashBridgeGenericFriends NO FRIENDS OR ERROR");
+			
+			callback([]);
+		}
 	});
 }
 

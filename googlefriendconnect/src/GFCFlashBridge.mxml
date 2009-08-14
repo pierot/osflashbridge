@@ -57,6 +57,7 @@
 				
 				btnConnect.enabled = false;
 				btnDisconnect.enabled = true;
+				btnFriends.enabled = true;
 			}
 			
 			private function onGFCInited(e:GoogleFriendConnectEvent):void
@@ -111,6 +112,32 @@
 				btnConnect.enabled = true;
 				btnDisconnect.enabled = false;
 				btnCurrentUser.enabled = false;
+				btnFriends.enabled = false;
+			}
+			
+			private function getFriendsOfUser():void {
+				_os.addEventListener(OSBridgeEvents.FRIENDS, onUserFriends, false, 0, true);
+					
+				_os.getFriends(_os.viewer.id);
+			}
+			
+			private function onUserFriends(e:OSBridgeEvents):void
+			{
+				Logger.log("User Friends");
+				
+				_os.removeEventListener(OSBridgeEvents.FRIENDS, onSiteFriends);
+				
+				var arrcFriends:ArrayCollection = new ArrayCollection();
+				var arrFriends:Array = e.data as Array;
+				
+				for(var i:int = 0; i < arrFriends.length; i++)
+				{
+					var osFriend:OSUser = new OSUser(arrFriends[i]);
+					
+					arrcFriends.addItem({uid: osFriend.id, name: osFriend.displayName});
+				}
+				
+				dgFriends.dataProvider = arrcFriends;
 			}
 			
 			private function getFriendsOfSite():void
@@ -124,7 +151,7 @@
 			{
 				Logger.log("Site Friends");
 				
-				_os.removeEventListener(OSBridgeEvents.FRIENDS, onSiteFriends);
+				_os.removeEventListener(OSBridgeEvents.FRIENDS_OWNER, onSiteFriends);
 				
 				var arrcFriends:ArrayCollection = new ArrayCollection();
 				var arrFriends:Array = e.data as Array;
@@ -155,12 +182,19 @@
 			<mx:DataGridColumn headerText="Name" dataField="name"/>
 		</mx:columns>
 	</mx:DataGrid>
+	<mx:DataGrid x="339" y="282" width="346" height="144" id="dgFriends">
+		<mx:columns>
+			<mx:DataGridColumn headerText="ID" dataField="uid"/>
+			<mx:DataGridColumn headerText="Name" dataField="name"/>
+		</mx:columns>
+	</mx:DataGrid>
 	
 	<mx:Label x="247" y="42" text="Site Friends"/>
 	
 	<mx:Button x="325" y="40" label="R" id="btnRefresh" click="getFriendsOfSite()"/>
 	
-	<mx:TextArea x="10" y="253" width="465" height="173" id="txtTrace"/>
+	<mx:TextArea x="10" y="253" width="321" height="173" id="txtTrace"/>
 	<mx:Label x="10" y="227" text="Debugger"/>
+	<mx:Button x="339" y="252" label="Get user friends" id="btnFriends" enabled="false" click="getFriendsOfUser()"/>
 	
 </mx:Application>

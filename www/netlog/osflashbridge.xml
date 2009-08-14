@@ -29,6 +29,8 @@
 			
 			swfobject.embedSWF("http://stream.microsite.be/dev/netlog/assets/swf/OpenSocialFlashBridge.swf", "flash_alternative", "720", "600", "9.0.0", "http://stream.microsite.be/dev/netlog/assets/swf/playerProductInstall.swf", flashvars, params, attributes);
 			
+			gadgets.window.adjustHeight(600);
+			
 		</script>
 		
 		<div id="flash_alternative">
