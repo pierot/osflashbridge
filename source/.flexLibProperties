@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<flexLibProperties version="1">
+<includeClasses>
+<classEntry path="be.wellconsidered.apis.osbridge.OSBridge"/>
+<classEntry path="be.wellconsidered.apis.osbridge.constants.OSMessageTypes"/>
+<classEntry path="be.wellconsidered.apis.osbridge.data.OSMessage"/>
+<classEntry path="be.wellconsidered.apis.osbridge.data.OSUser"/>
+<classEntry path="be.wellconsidered.apis.osbridge.events.OSBridgeEvents"/>
+</includeClasses>
+<includeResources/>
+<namespaceManifests/>
+</flexLibProperties>

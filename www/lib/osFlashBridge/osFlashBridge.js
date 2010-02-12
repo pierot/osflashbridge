@@ -61,7 +61,7 @@ function OSFlashBridgeInit() {
 	sDomain = oEnv.getDomain();
 	
 	oUserProfileParams = {};
-	oUserProfileParams[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = [opensocial.Person.Field.GENDER, opensocial.Person.Field.ID, opensocial.Person.Field.NAME, opensocial.Person.Field.THUMBNAIL_URL, opensocial.Person.Field.PROFILE_URL];
+	oUserProfileParams[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = [opensocial.Person.Field.DATE_OF_BIRTH, opensocial.Person.Field.GENDER, opensocial.Person.Field.ID, opensocial.Person.Field.NAME, opensocial.Person.Field.THUMBNAIL_URL, opensocial.Person.Field.PROFILE_URL];
 	// oUserProfileParams[opensocial.DataRequest.PeopleRequestFields.PROFILE_DETAILS] = [opensocial.Person.Field.EMAILS];
 	
 	oUserProfileParams[opensocial.DataRequest.PeopleRequestFields.FIRST] = 0;
