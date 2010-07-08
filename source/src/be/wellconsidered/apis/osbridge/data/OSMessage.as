@@ -9,7 +9,7 @@ package be.wellconsidered.apis.osbridge.data
 		private var _sMessageType:String = "";
 		private var _oParams:Object = null;
 		
-		public function OSMessage(titel:String, body:String, messageType:String = "", params:Object = null)
+		public function OSMessage(title:String, body:String, messageType:String = "", params:Object = null)
 		{
 			_sTitle = title;
 			_sBody = body;
